@@ -6,7 +6,7 @@ class BlockListSerializer(serializers.Serializer):
 
 
 class BlockDetailSerializer(serializers.Serializer):
-    baseFeePerGas = serializers.CharField()
+    baseFeePerGas = serializers.CharField(required=False)
     difficulty = serializers.CharField()
     extraData = serializers.CharField()
     gasLimit = serializers.CharField()

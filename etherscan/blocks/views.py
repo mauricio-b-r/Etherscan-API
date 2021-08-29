@@ -30,10 +30,14 @@ class BlocksApiView(APIView):
         if not IsHex(last_block_number_hex):
             message = "Block number should be Hex."
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
-        blocks_info_list = [last_block_number_hex - x for x in range(5)]
-
-        block_data = get_block_by_number_request(last_block_number_hex).json()["result"]
-        block_data_serializer = BlockDetailSerializer(data=block_data, many=True)
+        last_block_number_dec = int(last_block_number_hex, 16)
+        block_data_list = []
+        for x in range(5):
+            block_no_hex = hex(last_block_number_dec - x)
+            block_data_list.append(
+                get_block_by_number_request(block_no_hex).json()["result"]
+            )
+        block_data_serializer = BlockDetailSerializer(data=block_data_list, many=True)
 
         if not block_data_serializer.is_valid():
             return Response(
@@ -80,9 +84,19 @@ class TransactionByHashApiView(APIView):
         print(tx_hash)
         transaction_data = get_transaction_by_transaction_hash_request(
             tx_hash=tx_hash
-        ).json()["result"]
-        transaction_data_serializer = TransactionDetailSerializer(data=transaction_data)
-        return Response(transaction_data, status=status.HTTP_200_OK)
+        ).json()
+        print(transaction_data)
+        if transaction_data.get("error"):
+            message = transaction_data["error"]["message"]
+            return Response(
+                messaage,
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        transaction_data_serializer = TransactionDetailSerializer(
+            data=transaction_data["result"]
+        )
+
         if not transaction_data_serializer.is_valid():
             return Response(
                 transaction_data_serializer.errors, status=status.HTTP_400_BAD_REQUEST
@@ -108,9 +122,9 @@ class TransactionsByAddressApiView(APIView):
         block_data = get_transactions_by_address_request(
             address=address_number, page=page
         ).json()
-
-        if block_data["status"] == 0:
-            message = block_data["message"]
+        print(block_data)
+        if int(block_data["status"]) == 0:
+            message = f"{block_data['message']} | {block_data['result']}"
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
         block_data_serializer = TransactionByAddressDetailSerializer(
