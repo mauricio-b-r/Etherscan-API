@@ -14,8 +14,25 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from blocks.views import BlockApiView
+
+from blocks.views import (
+    BlockDetailApiView,
+    BlocksApiView,
+    TransactionsByAddressApiView,
+    TransactionByHashApiView,
+)
 
 urlpatterns = [
-    path("", BlockApiView.as_view(), name="block-api-view"),
+    path("", BlocksApiView.as_view(), name="block-api-view"),
+    path(
+        "/address",
+        TransactionsByAddressApiView.as_view(),
+        name="transactions-by-address-api-view",
+    ),
+    path("/detail", BlockDetailApiView.as_view(), name="block-detail-api-view"),
+    path(
+        "/transaction-hash",
+        TransactionByHashApiView.as_view(),
+        name="transaction-by-hash-api-view",
+    ),
 ]
