@@ -24,7 +24,7 @@ class BlocksApiView(APIView):
 
     def get(self, request, format=None):
         last_block_number_hex = (
-            request.data.get("last_block_hex")
+            request.query_params.get("last_block_hex")
             or get_latest_block_number_request().json()["result"]
         )
         if not IsHex(last_block_number_hex):
@@ -54,7 +54,7 @@ class BlockDetailApiView(APIView):
     """
 
     def get(self, request, format=None):
-        block_number_hex = request.data.get("block_no")
+        block_number_hex = request.query_params.get("block_no")
         if not IsHex(block_number_hex):
             message = "Block number was not provided or was incorrect."
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
@@ -77,15 +77,15 @@ class TransactionByHashApiView(APIView):
     """
 
     def get(self, request, format=None):
-        tx_hash = request.data.get("tx_hash")
+        tx_hash = request.query_params.get("tx_hash")
         if not tx_hash:
             message = "Transaction hash was not provided."
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
-        print(tx_hash)
+
         transaction_data = get_transaction_by_transaction_hash_request(
             tx_hash=tx_hash
         ).json()
-        print(transaction_data)
+
         if transaction_data.get("error"):
             message = transaction_data["error"]["message"]
             return Response(
@@ -112,8 +112,8 @@ class TransactionsByAddressApiView(APIView):
     """
 
     def get(self, request, format=None):
-        address_number = request.data.get("address_no")
-        page = request.data.get("page", 1)
+        address_number = request.query_params.get("address_no")
+        page = request.query_params.get("page", 1)
 
         if not IsHex(address_number):
             message = "Address was not provided or was incorrect."
@@ -122,8 +122,7 @@ class TransactionsByAddressApiView(APIView):
         block_data = get_transactions_by_address_request(
             address=address_number, page=page
         ).json()
-        print(block_data)
-        if int(block_data["status"]) == 0:
+        if block_data["status"] == "0":
             message = f"{block_data['message']} | {block_data['result']}"
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
