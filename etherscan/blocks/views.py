@@ -33,10 +33,11 @@ class BlocksApiView(APIView):
         last_block_number_dec = int(last_block_number_hex, 16)
         block_data_list = []
         for x in range(5):
+            data = get_block_by_number_request(block_no_hex).json()
+            if data.get("error"):
+                continue
             block_no_hex = hex(last_block_number_dec - x)
-            block_data_list.append(
-                get_block_by_number_request(block_no_hex).json()["result"]
-            )
+            block_data_list.append(data["result"])
         block_data_serializer = BlockDetailSerializer(data=block_data_list, many=True)
 
         if not block_data_serializer.is_valid():
